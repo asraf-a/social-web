@@ -1,0 +1,49 @@
+{% extends "base.html" %}
+
+{% block title %}Images Bookmarked | Bookmarks{% endblock %}
+
+{% block content %}
+<div class="gallery-header" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem;">
+  <div>
+    <h1>Images Bookmarked</h1>
+    <p style="margin-bottom: 0;">Explore visual discoveries shared by community members.</p>
+  </div>
+  <div style="display: flex; gap: 0.75rem;">
+    <a href="{% url 'images:create' %}" class="button">+ Add Image</a>
+    <a href="{% url 'dashboard' %}" class="btn-secondary">Bookmarklet</a>
+  </div>
+</div>
+
+<div id="image-list" class="image-grid">
+  {% include "images/image/list_ajax.html" %}
+</div>
+
+<div id="loading-spinner" style="display: none; text-align: center; padding: 2rem; color: var(--text-muted);">
+  Loading more images...
+</div>
+{% endblock %}
+
+{% block domready %}
+  var page = 1;
+  var empty_page = false;
+  var block_request = false;
+
+  $(window).scroll(function() {
+    var margin = $(document).height() - $(window).height() - 250;
+    if ($(window).scrollTop() > margin && empty_page === false && block_request === false) {
+      block_request = true;
+      page += 1;
+      $('#loading-spinner').show();
+
+      $.get('?page=' + page, function(data) {
+        $('#loading-spinner').hide();
+        if (data.trim() === '') {
+          empty_page = true;
+        } else {
+          block_request = false;
+          $('#image-list').append(data);
+        }
+      });
+    }
+  });
+{% endblock %}

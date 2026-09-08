@@ -1,0 +1,28 @@
+{% extends "base.html" %}
+
+{% block title %}Bookmark an Image | Bookmarks{% endblock %}
+
+{% block content %}
+<div class="card card-auth" style="max-width: 580px;">
+  <h1>Bookmark an image</h1>
+  <p>Preview and save this image to your Bookmarks profile:</p>
+
+  {% if request.GET.url %}
+    <div style="text-align: center; margin-bottom: 1.5rem; background: #0f172a; padding: 0.75rem; border-radius: 10px;">
+      <img src="{{ request.GET.url }}" alt="Preview" style="max-width: 100%; max-height: 280px; object-fit: contain; border-radius: 6px;">
+    </div>
+  {% endif %}
+
+  <form method="post">
+    {{ form.as_p }}
+    {% csrf_token %}
+    <p style="margin-top: 1.5rem;">
+      <input type="submit" value="Bookmark it!" class="btn-primary">
+    </p>
+  </form>
+
+  <div class="auth-footer-links">
+    <p><a href="{% url 'images:list' %}">&larr; Back to Images</a></p>
+  </div>
+</div>
+{% endblock %}

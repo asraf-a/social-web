@@ -1,0 +1,25 @@
+{% load thumbnail %}
+{% for image in images %}
+  <div class="image-card">
+    <a href="{{ image.get_absolute_url }}" class="image-link">
+      {% thumbnail image.image 300x300 crop="smart" as im %}
+      <img src="{{ im.url }}" alt="{{ image.title }}" loading="lazy">
+    </a>
+    <div class="info">
+      <a href="{{ image.get_absolute_url }}" class="title">
+        {{ image.title|truncatechars:40 }}
+      </a>
+      <div class="meta">
+        <span>by {{ image.user.first_name|default:image.user.username }}</span>
+        <span class="likes-badge">❤️ {{ image.users_like.count }}</span>
+      </div>
+    </div>
+  </div>
+{% empty %}
+  <div class="no-images-banner" style="grid-column: 1 / -1; text-align: center; padding: 3rem 1rem; color: var(--text-muted);">
+    <div style="font-size: 3rem; margin-bottom: 0.5rem;">📸</div>
+    <h3>No images bookmarked yet!</h3>
+    <p>Use the bookmarklet tool from your dashboard to start bookmarking images from the web.</p>
+    <a href="{% url 'dashboard' %}" class="btn-primary" style="display: inline-flex; width: auto; margin-top: 1rem;">Go to Dashboard</a>
+  </div>
+{% endfor %}

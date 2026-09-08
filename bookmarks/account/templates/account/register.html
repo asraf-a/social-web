@@ -1,0 +1,22 @@
+{% extends "base.html" %}
+
+{% block title %}Create an Account | Bookmarks{% endblock %}
+
+{% block content %}
+<div class="card card-auth">
+  <h1>Create an Account</h1>
+  <p>Please sign up using the form below to join Bookmarks:</p>
+
+  <form method="post">
+    {{ user_form.as_p }}
+    {% csrf_token %}
+    <p style="margin-top: 1.25rem;">
+      <input type="submit" value="Create my account">
+    </p>
+  </form>
+
+  <div class="auth-footer-links">
+    <p>Already have an account? <a href="{% url 'login' %}">Sign in here</a></p>
+  </div>
+</div>
+{% endblock %}

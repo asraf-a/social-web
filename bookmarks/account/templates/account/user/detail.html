@@ -1,0 +1,89 @@
+{% extends "base.html" %}
+{% load thumbnail %}
+
+{% block title %}{{ user.get_full_name|default:user.username }} | Bookmarks{% endblock %}
+
+{% block content %}
+<div class="card" style="max-width: 800px; margin: 1.5rem auto;">
+  <div style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 1.5rem; border-bottom: 1px solid var(--border); padding-bottom: 1.5rem; margin-bottom: 2rem;">
+    <div style="display: flex; align-items: center; gap: 1.5rem;">
+      {% if user.profile.photo %}
+        {% thumbnail user.profile.photo "140x140" crop="100%" as im %}
+        <img src="{{ im.url }}" alt="{{ user.get_full_name }}" style="width: 100px; height: 100px; border-radius: 50%; object-fit: cover; border: 3px solid var(--primary-light);">
+      {% else %}
+        <div style="width: 100px; height: 100px; border-radius: 50%; background: linear-gradient(135deg, #6366f1 0%, #a855f7 100%); color: #fff; display: flex; align-items: center; justify-content: center; font-size: 2.2rem; font-weight: 700;">
+          {{ user.first_name|default:user.username|slice:":1"|upper }}
+        </div>
+      {% endif %}
+
+      <div>
+        <h1 style="margin-bottom: 0.25rem;">{{ user.get_full_name|default:user.username }}</h1>
+        <p style="margin-bottom: 0.5rem; color: var(--text-muted);">@{{ user.username }} &bull; Member since {{ user.date_joined|date:"M Y" }}</p>
+        {% with total_followers=user.followers.count %}
+          <span class="count" style="font-size: 1.05rem; font-weight: 700; color: var(--primary);">
+            <span class="total">{{ total_followers }}</span> follower{{ total_followers|pluralize }}
+          </span>
+        {% endwith %}
+      </div>
+    </div>
+
+    {% if request.user.is_authenticated and request.user != user %}
+      {% with user_followers=user.followers.all %}
+        <a href="#" data-id="{{ user.id }}" data-action="{% if request.user in user_followers %}un{% endif %}follow" class="follow button btn-primary {% if request.user in user_followers %}unfollow{% endif %}" id="follow-btn" style="width: auto; padding: 0.65rem 1.5rem;">
+          {% if request.user not in user_followers %}
+            + Follow
+          {% else %}
+            Unfollow
+          {% endif %}
+        </a>
+      {% endwith %}
+    {% endif %}
+  </div>
+
+  <h2>Images Bookmarked by {{ user.first_name|default:user.username }}</h2>
+  <div id="image-list" class="image-grid" style="margin-top: 1.5rem;">
+    {% include "images/image/list_ajax.html" with images=user.images_created.all %}
+  </div>
+
+  <div class="auth-footer-links" style="margin-top: 2rem;">
+    <p><a href="{% url 'user_list' %}">&larr; Back to all people</a></p>
+  </div>
+</div>
+{% endblock %}
+
+{% block domready %}
+  $('a.follow').click(function(e){
+    e.preventDefault();
+    var $btn = $(this);
+    var userId = $btn.data('id');
+    var action = $btn.data('action');
+
+    $.post('{% url "user_follow" %}',
+      {
+        id: userId,
+        action: action
+      },
+      function(data){
+        if (data['status'] == 'ok') {
+          var previous_action = $btn.data('action');
+          // toggle data-action
+          var new_action = previous_action == 'follow' ? 'unfollow' : 'follow';
+          $btn.data('action', new_action);
+
+          // toggle button text
+          $btn.text(previous_action == 'follow' ? 'Unfollow' : '+ Follow');
+          if (previous_action == 'follow') {
+            $btn.addClass('unfollow').css('background', '#ef4444');
+          } else {
+            $btn.removeClass('unfollow').css('background', 'var(--primary)');
+          }
+
+          // update total followers count
+          var $total = $('span.count .total');
+          var previous_followers = parseInt($total.text()) || 0;
+          $total.text(previous_action == 'follow' ? previous_followers + 1 : Math.max(0, previous_followers - 1));
+        }
+      }
+    );
+  });
+{% endblock %}

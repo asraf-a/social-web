@@ -1,0 +1,14 @@
+{% extends "base.html" %}
+
+{% block title %}Welcome to Bookmarks!{% endblock %}
+
+{% block content %}
+<div class="card card-auth" style="text-align: center;">
+  <div style="font-size: 3rem; margin-bottom: 0.5rem;">🎉</div>
+  <h1>Welcome, {{ new_user.first_name|default:new_user.username }}!</h1>
+  <p>Your account has been successfully created and your user profile has been set up.</p>
+  <p style="margin-top: 1.5rem;">
+    <a href="{% url 'login' %}" class="btn-primary" style="display: inline-flex; width: auto;">Log-in to your Account</a>
+  </p>
+</div>
+{% endblock %}
